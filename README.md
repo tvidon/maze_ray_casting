@@ -6,7 +6,6 @@ The maze is ray casted using the DDA algorithm ([written after reading this lode
 
 ## TODO
 
-- maze exit
 - start and end screen
 - maze generation algorithm
 - textures

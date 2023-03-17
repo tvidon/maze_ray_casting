@@ -162,8 +162,8 @@ int handle_input(RaycasterData* raycaster_data)
     }
     if (raycaster_data->up || raycaster_data->down || raycaster_data->right || raycaster_data->left)
     {
-        if (!raycaster_data->map[(int) new.x][(int) raycaster_data->position.y]) raycaster_data->position.x = new.x;
-        if (!raycaster_data->map[(int) raycaster_data->position.x][(int) new.y]) raycaster_data->position.y = new.y;
+        if (!(raycaster_data->map[(int) new.x][(int) raycaster_data->position.y] == 1)) raycaster_data->position.x = new.x;
+        if (!(raycaster_data->map[(int) raycaster_data->position.x][(int) new.y] == 1)) raycaster_data->position.y = new.y;
         return 1;
     }
 
@@ -240,7 +240,7 @@ static double cast(RaycasterData* raycaster_data, int x)
     // find the distance
     double distance = (last_incremented) ? number_to_next_y - number_for_one_y : number_to_next_x - number_for_one_x;
 
-    return distance;
+    return (raycaster_data->map[x_check][y_check] == 1) ? distance : -distance;
 }
 
 
@@ -253,6 +253,11 @@ int render_and_sleep(RaycasterData* raycaster_data)
     for (int x = 0; x < raycaster_data->window_width; x++) // loop over all window columns
     {
         double distance = cast(raycaster_data, x);
+        if (distance < 0)
+        {
+            distance = fabs(distance);
+            SDL_SetRenderDrawColor(raycaster_data->sdl_renderer, 0, 100, 0, 255);
+        }
         if (distance > 1)
         {
             int height = raycaster_data->window_height / distance; // height of the line
@@ -260,6 +265,7 @@ int render_and_sleep(RaycasterData* raycaster_data)
             SDL_RenderDrawLine(raycaster_data->sdl_renderer, x, startY, x, startY + height);
         }
         else SDL_RenderDrawLine(raycaster_data->sdl_renderer, x, 0, x, raycaster_data->window_height);
+        SDL_SetRenderDrawColor(raycaster_data->sdl_renderer, 100, 100, 100, 255);
     }
     SDL_RenderPresent(raycaster_data->sdl_renderer);
 
@@ -267,4 +273,11 @@ int render_and_sleep(RaycasterData* raycaster_data)
     Uint64 time = SDL_GetTicks64() - raycaster_data->frame_start_time;
     if (time < raycaster_data->min_time_per_frame) SDL_Delay(raycaster_data->min_time_per_frame - time);
     raycaster_data->frame_start_time = SDL_GetTicks64();
+}
+
+
+
+int get_current_square_value(RaycasterData* raycaster_data)
+{
+    return raycaster_data->map[(int) raycaster_data->position.x][(int) raycaster_data->position.y];
 }

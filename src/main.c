@@ -26,7 +26,15 @@ int main(void)
     while (run)
     {
         int received_input = handle_input(raycaster);
-        if (received_input == 1) render_and_sleep(raycaster);
+        if (received_input == 1)
+        {
+            render_and_sleep(raycaster);
+            if (get_current_square_value(raycaster) == 2)
+            {
+                run = 0;
+                printf("Exit\n");
+            }
+        }
         else if (received_input == 2) run = 0;
     }
 

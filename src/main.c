@@ -10,9 +10,6 @@ int main(void)
     int window_width = 640;
     int window_height = 480;
     int fov = 60;
-    double player_start_x = 1;
-    double player_start_y = 1;
-    double player_start_rotation = -0.785; // ~= 45 degrees
     double rotation_speed = 3.0 / fps_cap;
     double movement_speed = 3.0 / fps_cap;
     int map_size = 15;
@@ -36,7 +33,7 @@ int main(void)
         printf("seed: %d\n", seed);
     }
 
-    RaycasterData* raycaster = initialize_raycaster(fps_cap, window_width, window_height, fov, player_start_x, player_start_y, player_start_rotation, rotation_speed, movement_speed, map);
+    RaycasterData* raycaster = initialize_raycaster(fps_cap, window_width, window_height, fov, 1.5, 1.5, -0.785, rotation_speed, movement_speed, map);
     if (!raycaster) return 1;
 
     render_and_sleep(raycaster);

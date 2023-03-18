@@ -5,53 +5,138 @@
 
 
 
-int** generate_map(int size)
+// Durstenfeld version of the Fisher-Yates shuffle
+static void shuffle(int list[], int size)
 {
+    for (int i = size - 1; i > 0; i--)
+    {
+        int j = (rand() % (i + 1)); // not perfectly uniform but quick
+        int temp = list[j];
+        list[j] = list[i];
+        list[i] = temp;
+    }
+}
+
+
+// Carve a maze using the recursive backtracking algorithm
+static void carve(int x, int y, MapInfo* map)
+{
+    int directions[] = {1, 2, 3, 4}; // up, down, left, right
+    shuffle(directions, 4);
+    for (int i = 0; i < 4; i++)
+    {
+        if (directions[i] == 1)
+        {
+            int new_y = y + 2;
+            if (new_y < map->size && map->map[x][new_y] == -1)
+            {
+                map->map[x][new_y - 1] = 0;
+                map->map[x][new_y] = 0;
+                carve(x, new_y, map);
+            }
+        }
+        else if (directions[i] == 2)
+        {
+            int new_y = y - 2;
+            if (new_y > 0 && map->map[x][new_y] == -1) // no need to check y 0
+            {
+                map->map[x][new_y + 1] = 0;
+                map->map[x][new_y] = 0;
+                carve(x, new_y, map);
+            }
+        }
+        else if (directions[i] == 3)
+        {
+            int new_x = x - 2;
+            if (new_x > 0 && map->map[new_x][y] == -1) // no need to check x 0
+            {
+                map->map[new_x + 1][y] = 0;
+                map->map[new_x][y] = 0;
+                carve(new_x, y, map);
+            }
+        }
+        else
+        {
+            int new_x = x + 2;
+            if (new_x < map->size && map->map[new_x][y] == -1)
+            {
+                map->map[new_x - 1][y] = 0;
+                map->map[new_x][y] = 0;
+                carve(new_x, y, map);
+            }
+        }
+    }
+}
+
+
+MapInfo* generate_map(int size)
+{
+    // MAKE SURE MAP SIZE IS APPROPRIATE
+
+    // 3 by 3 minimum
+    if (size < 3) size = 3;
+
+    // the recursive backtracking algorithm requires an uneven map width and height
+    if (!(size % 2)) size--;
+    
     // INITIALIZE RETURN POINTER
 
-    int** map = malloc(size * sizeof(int*));
+    MapInfo* map= malloc(sizeof(MapInfo));
     if (!map)
     {
-        printf("error attempting to allocate memory for the map\n");
+        printf("error attempting to allocate memory for the map info\n");
         return NULL;
     }
-    for (int i = 0; i < 10; i++)
+    map->map = malloc(size * sizeof(int*));
+    if (!map->map)
     {
-        map[i] = malloc(size * sizeof(int));
-        if (!map[i])
+        printf("error attempting to allocate memory for the map\n");
+        free(map);
+        return NULL;
+    }
+    for (int x = 0; x < size; x++)
+    {
+        map->map[x] = malloc(size * sizeof(int));
+        if (!map->map[x])
         {
             printf("error attempting to allocate memory for the map\n");
+            for (int free_x = 0; free_x < x; free_x++)
+                free(map->map[free_x]);
+            free(map->map);
+            free(map);
             return NULL;
         }
     }
+    map->size = size;
     
     // GENERATE MAP
+    
+    // uses the recursive backtracking algorithm
 
-    int generated_map[10][10] =
+    // generate all walls
+    for (int x = 0; x < size; x++)
+    {
+        for (int y = 0; y < size; y++)
         {
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 1, 1, 1, 1, 1, 0, 0, 1},
-            {1, 0, 1, 0, 0, 0, 1, 0, 0, 1},
-            {1, 0, 1, 0, 0, 0, 1, 0, 0, 1},
-            {1, 0, 0, 0, 1, 0, 1, 0, 0, 1},
-            {1, 0, 1, 0, 2, 0, 1, 0, 0, 1},
-            {1, 0, 1, 0, 0, 0, 1, 0, 0, 1},
-            {1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-        };
+            if ((x % 2) == 0 || (y % 2) == 0) map->map[x][y] = 1;
+            else map->map[x][y] = -1; // - 1 is an unexplored empty square
+        }
+    }
+    
+    // carve paths
+    map->map[1][1] = 0;
+    carve(1, 1, map);
 
-    // fill up the output array
-    for (int i = 0; i < 10; i++)
-        for (int j = 0; j < 10; j++)
-            map[i][j] = generated_map[i][j];
+    // add exit
+    map->map[size - 1][size - 2] = 2;
 
     return map;
 }
 
-void destroy_map(int** map)
+void destroy_map(MapInfo* map)
 {
-    for (int i = 0; i < 10; i++)
-        free(map[i]);
+    for (int x = 0; x < map->size; x++)
+        free(map->map[x]);
+    free(map->map);
     free(map);
 }

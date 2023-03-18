@@ -1,13 +1,12 @@
 # maze_ray_casting
 
-Navigate a randomly generated ray casted maze
+Navigate a randomly generated raycasted maze
 
-The maze is ray casted using the DDA algorithm ([written after reading this lodev article](https://lodev.org/cgtutor/raycasting.html)).
+The maze is raycasted using the DDA algorithm ([written after reading this lodev article](https://lodev.org/cgtutor/raycasting.html))
 
 ## TODO
 
 - start and end screen
-- maze generation algorithm
 - textures
 
 ## build instructions (linux)
@@ -17,5 +16,5 @@ Requires sdl2 (archlinux `sdl2` and `sdl2_image`)
 ```
 cd maze_ray_casting
 make
-./bin/main
+./main
 ```

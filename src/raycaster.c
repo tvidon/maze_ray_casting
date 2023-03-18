@@ -5,7 +5,7 @@
 
 
 
-RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_height, int fov, double player_start_x, double player_start_y, double player_start_rotation, double rotation_speed, double movement_speed, int** map)
+RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_height, int fov, double player_start_x, double player_start_y, double player_start_rotation, double rotation_speed, double movement_speed, MapInfo* map)
 {
     // INITIALIZE RETURN POINTER
 
@@ -88,7 +88,7 @@ RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_he
 
     // INITIALIZE GAME INFO
 
-    raycaster_data->map = map;
+    raycaster_data->map = map->map;
 
     return raycaster_data;
 }

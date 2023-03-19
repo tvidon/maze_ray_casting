@@ -6,7 +6,6 @@ The maze is raycasted using the DDA algorithm ([written after reading this lodev
 
 ## TODO
 
-- improve maze generation (avoid having parts of the maze only accessible by walking through an area adjacent to the exit + remove a few extra random walls)
 - start and end screens
 - textures
 

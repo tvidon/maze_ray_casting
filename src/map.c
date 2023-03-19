@@ -73,10 +73,10 @@ MapInfo* generate_map(int size)
 {
     // MAKE SURE MAP SIZE IS APPROPRIATE
 
-    // 3 by 3 minimum
-    if (size < 3) size = 3;
+    // 5 by 5 minimum
+    if (size < 5) size = 5;
 
-    // the recursive backtracking algorithm requires an uneven map width and height
+    // the recursive backtracking algorithm requires an odd map width and height
     if (!(size % 2)) size--;
     
     // INITIALIZE RETURN POINTER
@@ -122,10 +122,25 @@ MapInfo* generate_map(int size)
             else map->map[x][y] = -1; // - 1 is an unexplored empty square
         }
     }
-    
+
     // carve paths
-    map->map[1][1] = 0;
-    carve(1, 1, map);
+    // starting from the exit to avoid having some branches that are only accessible if you walk by the exit
+    map->map[size - 2][size - 2] = 0;
+    carve(size - 2, size - 2, map);
+
+    // remove (map->size / 6) random walls near the center to:
+    // - make up for the low branching of the recursive backtracking algorithm
+    // - add loops to the maze
+    // this probably makes the maze easier but it also makes it more interesting
+    int third = size / 3;
+    for (int i = 0; i < map->size / 6; i++)
+    {
+        int rand_x = third + (rand() % third);
+        int rand_y = third + (rand() % third);
+        if ((rand_x % 2 && rand_y % 2) || !(rand_x % 2 || rand_y % 2)) rand_y++;
+        if (map->map[rand_x][rand_y]) map->map[rand_x][rand_y] = 0;
+        else i--;
+    }
 
     // add exit
     map->map[size - 1][size - 2] = 2;

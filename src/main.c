@@ -35,7 +35,7 @@ int main(int argc, char** argv)
         printf("seed: %d\n", seed);
     }
 
-    RaycasterData* raycaster = initialize_raycaster(fps_cap, window_width, window_height, fov, 1.5, 1.5, -0.785, rotation_speed, movement_speed, map);
+    RaycasterData* raycaster = initialize_raycaster(fps_cap, window_width, window_height, fov, 1.5, 1.5, -0.785, rotation_speed, movement_speed, map, "./res/wall.png", "./res/door.png");
     if (!raycaster) return 1;
 
     render_and_sleep(raycaster);

@@ -1,12 +1,22 @@
 #include <math.h>
 #include <stdio.h>
+#include <SDL2/SDL_image.h>
 
 #include "raycaster.h"
 
 
+typedef struct
+{
+    double distance; // distance traveled by the ray
+    int hit_texture_id; // id of the texture of the block that was hit
+    double hit_x; // x on the texture of the block
+}
+RayResults;
+
+
 
 // Uses the DDA algorithm
-RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_height, int fov, double player_start_x, double player_start_y, double player_start_rotation, double rotation_speed, double movement_speed, MapInfo* map)
+RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_height, int fov, double player_start_x, double player_start_y, double player_start_rotation, double rotation_speed, double movement_speed, MapInfo* map, char* texture1_file, char* texture2_file)
 {
     // INITIALIZE RETURN POINTER
 
@@ -58,6 +68,20 @@ RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_he
     SDL_Event event;
     memcpy(raycaster_data->sdl_event, &event, sizeof(SDL_Event));
 
+    // load textures
+    raycaster_data->texture1 = IMG_Load(texture1_file);
+    if (!raycaster_data->texture1)
+    {
+        printf("error attempting to load texture 1 (%s)\n", texture1_file);
+        return NULL;
+    }
+    raycaster_data->texture2 = IMG_Load(texture2_file);
+    if (!raycaster_data->texture2)
+    {
+        printf("error attempting to load texture 2 (%s)\n", texture2_file);
+        return NULL;
+    }
+
     // INITIALIZE FRAME TIME INFO
 
     raycaster_data->min_time_per_frame = 1000.0 / fps_cap;
@@ -100,6 +124,8 @@ void destroy_raycaster(RaycasterData* raycaster_data)
         SDL_DestroyRenderer(raycaster_data->sdl_renderer);
         SDL_DestroyWindow(raycaster_data->sdl_window);
         SDL_Quit();
+        SDL_FreeSurface(raycaster_data->texture1);
+        SDL_FreeSurface(raycaster_data->texture2);
         free(raycaster_data->sdl_event);
         free(raycaster_data);
 }
@@ -172,7 +198,7 @@ int handle_input(RaycasterData* raycaster_data)
 }
 
 
-static double cast(RaycasterData* raycaster_data, int x)
+static void cast(RaycasterData* raycaster_data, int x, RayResults* ray_results)
 {
     // set the direction of the ray
     // -1 to 1, representing where the screen x is in the camera plane
@@ -213,60 +239,84 @@ static double cast(RaycasterData* raycaster_data, int x)
     int found_wall = 0;
     int x_check = raycaster_data->position.x; // x that is currently being checked for a square
     int y_check = raycaster_data->position.y; // y that is currently being checked for a square
-    int last_incremented; // 0 if x was incremented last, 1 if y was incremented last
     while (!found_wall)
     {
         if (number_to_next_x < number_to_next_y)
         {
-            number_to_next_x += number_for_one_x;
             x_check += ray_x_increment;
             if (raycaster_data->map[x_check][y_check])
             {
-                last_incremented = 0;
                 found_wall = 1;
+                ray_results->distance = number_to_next_x;
+                ray_results->hit_x = raycaster_data->position.y + number_to_next_x * ray.y;
             }
+            else number_to_next_x += number_for_one_x;
         }
         else
         {
-            number_to_next_y += number_for_one_y;
             y_check += ray_y_increment;
             if (raycaster_data->map[x_check][y_check])
             {
-                last_incremented = 1;
                 found_wall = 1;
+                ray_results->distance = number_to_next_y;
+                ray_results->hit_x = raycaster_data->position.x + number_to_next_y * ray.x;
             }
+            else number_to_next_y += number_for_one_y;
         }
     }
-
-    // find the distance
-    double distance = (last_incremented) ? number_to_next_y - number_for_one_y : number_to_next_x - number_for_one_x;
-
-    return (raycaster_data->map[x_check][y_check] == 1) ? distance : -distance;
+    ray_results->hit_x -= floor(ray_results->hit_x);
+    ray_results->hit_texture_id = raycaster_data->map[x_check][y_check];
 }
 
 
 int render_and_sleep(RaycasterData* raycaster_data)
 {
     // render
-    SDL_SetRenderDrawColor(raycaster_data->sdl_renderer, 0, 0, 0, 255);
+    // clear the background, make it floor colored
+    SDL_SetRenderDrawColor(raycaster_data->sdl_renderer, 75, 0, 0, 255);
     SDL_RenderClear(raycaster_data->sdl_renderer);
-    SDL_SetRenderDrawColor(raycaster_data->sdl_renderer, 100, 100, 100, 255);
-    for (int x = 0; x < raycaster_data->window_width; x++) // loop over all window columns
+    // draw the roof
+    SDL_SetRenderDrawColor(raycaster_data->sdl_renderer, 22, 9, 0, 255);
+    SDL_Rect rect;
+    rect.x = 0;
+    rect.y = 0;
+    rect.w = raycaster_data->window_width;
+    rect.h = raycaster_data->window_height / 2;
+    SDL_RenderFillRect(raycaster_data->sdl_renderer, &rect);
+    // loop over all window columns
+    for (int x = 0; x < raycaster_data->window_width; x++)
     {
-        double distance = cast(raycaster_data, x);
-        if (distance < 0)
+        RayResults ray_results;
+        cast(raycaster_data, x, &ray_results);
+        SDL_Surface* texture = (ray_results.hit_texture_id - 1) ? raycaster_data->texture2 : raycaster_data->texture1;
+        int height = raycaster_data->window_height / ray_results.distance; // perceived height of the wall
+        int texture_x = ray_results.hit_x * texture->w;
+        double texture_y; // double because increments will be smaller than 1
+        double texture_y_increment = (double) texture->h / height;
+        int start_y; // start y of the wall on the screen
+        int end_y; // end y of the wall on the screen
+        if (raycaster_data->window_height > height)
         {
-            distance = fabs(distance);
-            SDL_SetRenderDrawColor(raycaster_data->sdl_renderer, 0, 100, 0, 255);
+            start_y = (raycaster_data->window_height - height) / 2;
+            end_y = start_y + height;
+            texture_y = 0;
         }
-        if (distance > 1)
+        else
         {
-            int height = raycaster_data->window_height / distance; // height of the line
-            int startY = (raycaster_data->window_height - height) / 2; // start y of the line
-            SDL_RenderDrawLine(raycaster_data->sdl_renderer, x, startY, x, startY + height);
+            start_y = 0;
+            end_y = raycaster_data->window_height;
+            texture_y = (height / 2 - raycaster_data->window_height / 2) * texture_y_increment;
         }
-        else SDL_RenderDrawLine(raycaster_data->sdl_renderer, x, 0, x, raycaster_data->window_height);
-        SDL_SetRenderDrawColor(raycaster_data->sdl_renderer, 100, 100, 100, 255);
+        // loop over all rows that have to be drawn
+        for (int y = start_y; y < end_y; y++)
+        {
+            Uint8 r, g, b;
+            Uint8* pixel = (Uint8*) texture->pixels + (int) texture_y * texture->pitch + texture_x * texture->format->BytesPerPixel;
+            SDL_GetRGB(*(Uint32*)pixel, texture->format, &r, &g, &b);
+            SDL_SetRenderDrawColor(raycaster_data->sdl_renderer, r, g, b, 255);
+            SDL_RenderDrawPoint(raycaster_data->sdl_renderer, x, y);
+            texture_y += texture_y_increment;
+        }
     }
     SDL_RenderPresent(raycaster_data->sdl_renderer);
 

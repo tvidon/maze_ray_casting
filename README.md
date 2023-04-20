@@ -7,7 +7,6 @@ The maze is raycasted using the DDA algorithm ([written after reading this lodev
 ## TODO
 
 - start and end screens
-- textures
 
 ## build instructions (linux)
 

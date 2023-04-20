@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS =
-LDFLAGS = -lSDL2 -lm
+LDFLAGS = -lSDL2 -lSDL2_image -lm
 SRC_DIR = src
 BUILD_DIR = build
 OBJ_FILES = $(BUILD_DIR)/main.o $(BUILD_DIR)/raycaster.o $(BUILD_DIR)/map.o $(BUILD_DIR)/vectors.o

@@ -12,6 +12,8 @@ typedef struct
     SDL_Window* sdl_window;
     SDL_Renderer* sdl_renderer;
     SDL_Event* sdl_event;
+    SDL_Surface* texture1;
+    SDL_Surface* texture2;
     // fps
     Uint64 frame_start_time;
     double min_time_per_frame;
@@ -28,7 +30,7 @@ typedef struct
     int left; // currently rotating left
     int down; // currently moving up
     int right; // currently rotating right
-
+    
     // game info
     int** map; // does not need the entire MapInfo struct
 }
@@ -42,7 +44,7 @@ player_start_rotation is in radians compared to facing in the direction of the y
 In the map: 0 represents an empty square, 1 represents a wall, 2 represents a wall with a different texture and without collision
 destroy_raycaster should be called once the raycaster isn't needed anymore
 */
-RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_height, int fov, double player_start_x, double player_start_y, double player_start_rotation, double rotation_speed, double movement_speed, MapInfo* map);
+RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_height, int fov, double player_start_x, double player_start_y, double player_start_rotation, double rotation_speed, double movement_speed, MapInfo* map, char* texture1_file, char* texture2_file);
 
 /*
 Ends the raycaster cleanly

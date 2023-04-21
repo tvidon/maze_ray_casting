@@ -63,6 +63,10 @@ RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_he
     if (!raycaster_data->sdl_event)
     {
         printf("error attempting to allocate memory for sdl event in RaycasterData\n");
+        SDL_DestroyRenderer(raycaster_data->sdl_renderer);
+        SDL_DestroyWindow(raycaster_data->sdl_window);
+        SDL_Quit();
+        free(raycaster_data);
         return NULL;
     }
     SDL_Event event;
@@ -73,12 +77,23 @@ RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_he
     if (!raycaster_data->texture1)
     {
         printf("error attempting to load texture 1 (%s)\n", texture1_file);
+        SDL_DestroyRenderer(raycaster_data->sdl_renderer);
+        SDL_DestroyWindow(raycaster_data->sdl_window);
+        SDL_Quit();
+        free(raycaster_data->sdl_event);
+        free(raycaster_data);
         return NULL;
     }
     raycaster_data->texture2 = IMG_Load(texture2_file);
     if (!raycaster_data->texture2)
     {
         printf("error attempting to load texture 2 (%s)\n", texture2_file);
+        SDL_DestroyRenderer(raycaster_data->sdl_renderer);
+        SDL_DestroyWindow(raycaster_data->sdl_window);
+        SDL_Quit();
+        SDL_FreeSurface(raycaster_data->texture1);
+        free(raycaster_data->sdl_event);
+        free(raycaster_data);
         return NULL;
     }
 
@@ -269,7 +284,7 @@ static void cast(RaycasterData* raycaster_data, int x, RayResults* ray_results)
 }
 
 
-int render_and_sleep(RaycasterData* raycaster_data)
+void render_and_sleep(RaycasterData* raycaster_data)
 {
     // render
     // clear the background, make it floor colored

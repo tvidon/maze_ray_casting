@@ -62,11 +62,19 @@ int handle_input(RaycasterData* raycaster_data);
 /*
 Renders the frame and sleeps until it's time for the next frame
 */
-int render_and_sleep(RaycasterData* raycaster_data);
+void render_and_sleep(RaycasterData* raycaster_data);
 
 /*
 Returns the value of the square the player is standing on
 */
 int get_current_square_value(RaycasterData* raycaster_data);
+
+/*
+Cover the entire screen with an image and wait for a key press
+Returns 1 if the player quits the app
+Returns 0 if the player presses a key
+Returns -1 if there is an error loading the image
+*/
+int screen(RaycasterData* raycaster_data, char* path);
 
 #endif

@@ -332,3 +332,29 @@ int get_current_square_value(RaycasterData* raycaster_data)
 {
     return raycaster_data->map[(int) raycaster_data->position.x][(int) raycaster_data->position.y];
 }
+
+
+int screen(RaycasterData* raycaster_data, char* path)
+{
+    SDL_Texture* texture = IMG_LoadTexture(raycaster_data->sdl_renderer, path);
+    if (!texture)
+    {
+        printf("error attempting to load %s\n", path);
+        return -1;
+    }
+    SDL_Rect texture_rect;
+    texture_rect.x = 0;
+    texture_rect.y = 0;
+    texture_rect.w = raycaster_data->window_width;
+    texture_rect.h = raycaster_data->window_height;
+    SDL_RenderCopy(raycaster_data->sdl_renderer, texture, NULL, &texture_rect);
+    SDL_RenderPresent(raycaster_data->sdl_renderer);
+    SDL_DestroyTexture(texture);
+
+    while (1)
+    {
+        SDL_WaitEvent(raycaster_data->sdl_event);
+        if (raycaster_data->sdl_event->type == SDL_KEYDOWN) return 0;
+        else if (raycaster_data->sdl_event->type == SDL_QUIT) return 1;
+    }
+}

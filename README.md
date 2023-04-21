@@ -6,10 +6,6 @@ The maze is raycasted using the DDA algorithm ([written after reading this lodev
 
 ![Demo](./images/demo.png)
 
-## TODO
-
-- start and end screens
-
 ## build instructions (linux)
 
 Requires sdl2 (archlinux `sdl2` and `sdl2_image`)

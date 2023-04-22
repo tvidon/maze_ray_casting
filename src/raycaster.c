@@ -288,10 +288,10 @@ void render_and_sleep(RaycasterData *raycaster_data)
 {
     // render
     // clear the background, make it floor colored
-    SDL_SetRenderDrawColor(raycaster_data->sdl_renderer, 75, 0, 0, 255);
+    SDL_SetRenderDrawColor(raycaster_data->sdl_renderer, 87, 87, 78, 255);
     SDL_RenderClear(raycaster_data->sdl_renderer);
     // draw the roof
-    SDL_SetRenderDrawColor(raycaster_data->sdl_renderer, 22, 9, 0, 255);
+    SDL_SetRenderDrawColor(raycaster_data->sdl_renderer, 29, 29, 24, 255);
     SDL_Rect rect;
     rect.x = 0;
     rect.y = 0;

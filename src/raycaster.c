@@ -16,14 +16,14 @@ RayResults;
 
 
 // Uses the DDA algorithm
-RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_height, int fov, double player_start_x, double player_start_y, double player_start_rotation, double rotation_speed, double movement_speed, MapInfo* map, char* texture1_file, char* texture2_file)
+RaycasterData *initialize_raycaster(int fps_cap, int window_width, int window_height, int fov, double player_start_x, double player_start_y, double player_start_rotation, double rotation_speed, double movement_speed, MapInfo *map, char *texture1_file, char *texture2_file)
 {
     // INITIALIZE RETURN POINTER
 
-    RaycasterData* raycaster_data = malloc(sizeof(RaycasterData));
+    RaycasterData *raycaster_data = malloc(sizeof(RaycasterData));
     if (!raycaster_data)
     {
-        printf("error attempting to allocate memory for RaycasterData\n");
+        fprintf(stderr, "error attempting to allocate memory for RaycasterData\n");
         return NULL;
     }
 
@@ -32,7 +32,7 @@ RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_he
     // init sdl
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
-        printf("sdl init error: %s\n", SDL_GetError());
+        fprintf(stderr, "sdl init error: %s\n", SDL_GetError());
         free(raycaster_data);
         return NULL;
     }
@@ -41,7 +41,7 @@ RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_he
     raycaster_data->sdl_window = SDL_CreateWindow("Maze", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, window_width, window_height, 0);
     if (!raycaster_data->sdl_window)
     {
-        printf("sdl window creation error: %s\n", SDL_GetError());
+        fprintf(stderr, "sdl window creation error: %s\n", SDL_GetError());
         SDL_Quit();
         free(raycaster_data);
         return NULL;
@@ -51,7 +51,7 @@ RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_he
     raycaster_data->sdl_renderer = SDL_CreateRenderer(raycaster_data->sdl_window, -1,  SDL_RENDERER_ACCELERATED);
     if (!raycaster_data->sdl_renderer)
     {
-        printf("sdl renderer creation error: %s\n", SDL_GetError());
+        fprintf(stderr, "sdl renderer creation error: %s\n", SDL_GetError());
         SDL_DestroyWindow(raycaster_data->sdl_window);
         SDL_Quit();
         free(raycaster_data);
@@ -62,7 +62,7 @@ RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_he
     raycaster_data->sdl_event = malloc(sizeof(SDL_Event));
     if (!raycaster_data->sdl_event)
     {
-        printf("error attempting to allocate memory for sdl event in RaycasterData\n");
+        fprintf(stderr, "error attempting to allocate memory for sdl event in RaycasterData\n");
         SDL_DestroyRenderer(raycaster_data->sdl_renderer);
         SDL_DestroyWindow(raycaster_data->sdl_window);
         SDL_Quit();
@@ -76,7 +76,7 @@ RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_he
     raycaster_data->texture1 = IMG_Load(texture1_file);
     if (!raycaster_data->texture1)
     {
-        printf("error attempting to load texture 1 (%s)\n", texture1_file);
+        fprintf(stderr, "error attempting to load texture 1 (%s)\n", texture1_file);
         SDL_DestroyRenderer(raycaster_data->sdl_renderer);
         SDL_DestroyWindow(raycaster_data->sdl_window);
         SDL_Quit();
@@ -87,7 +87,7 @@ RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_he
     raycaster_data->texture2 = IMG_Load(texture2_file);
     if (!raycaster_data->texture2)
     {
-        printf("error attempting to load texture 2 (%s)\n", texture2_file);
+        fprintf(stderr, "error attempting to load texture 2 (%s)\n", texture2_file);
         SDL_DestroyRenderer(raycaster_data->sdl_renderer);
         SDL_DestroyWindow(raycaster_data->sdl_window);
         SDL_Quit();
@@ -110,7 +110,7 @@ RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_he
     // INITIALIZE PLAYER INFO
 
     // camera plane (fov)
-    raycaster_data->camera_plane = (Vector) {tan((M_PI*fov)/360), 0};
+    raycaster_data->camera_plane = (Vector) {tan(M_PI * fov / 360), 0};
 
     // direction
     raycaster_data->direction = (Vector) {0, 1};
@@ -134,7 +134,7 @@ RaycasterData* initialize_raycaster(int fps_cap, int window_width, int window_he
 }
 
 
-void destroy_raycaster(RaycasterData* raycaster_data)
+void destroy_raycaster(RaycasterData *raycaster_data)
 {
         SDL_DestroyRenderer(raycaster_data->sdl_renderer);
         SDL_DestroyWindow(raycaster_data->sdl_window);
@@ -146,7 +146,7 @@ void destroy_raycaster(RaycasterData* raycaster_data)
 }
 
 
-int handle_input(RaycasterData* raycaster_data)
+int handle_input(RaycasterData *raycaster_data)
 {
     // GET INPUT
 
@@ -213,7 +213,7 @@ int handle_input(RaycasterData* raycaster_data)
 }
 
 
-static void cast(RaycasterData* raycaster_data, int x, RayResults* ray_results)
+static void cast(RaycasterData *raycaster_data, int x, RayResults *ray_results)
 {
     // set the direction of the ray
     // -1 to 1, representing where the screen x is in the camera plane
@@ -284,7 +284,7 @@ static void cast(RaycasterData* raycaster_data, int x, RayResults* ray_results)
 }
 
 
-void render_and_sleep(RaycasterData* raycaster_data)
+void render_and_sleep(RaycasterData *raycaster_data)
 {
     // render
     // clear the background, make it floor colored
@@ -303,7 +303,7 @@ void render_and_sleep(RaycasterData* raycaster_data)
     {
         RayResults ray_results;
         cast(raycaster_data, x, &ray_results);
-        SDL_Surface* texture = (ray_results.hit_texture_id - 1) ? raycaster_data->texture2 : raycaster_data->texture1;
+        SDL_Surface *texture = (ray_results.hit_texture_id - 1) ? raycaster_data->texture2 : raycaster_data->texture1;
         int height = raycaster_data->window_height / ray_results.distance; // perceived height of the wall
         int texture_x = ray_results.hit_x * texture->w;
         double texture_y; // double because increments will be smaller than 1
@@ -326,8 +326,8 @@ void render_and_sleep(RaycasterData* raycaster_data)
         for (int y = start_y; y < end_y; y++)
         {
             Uint8 r, g, b;
-            Uint8* pixel = (Uint8*) texture->pixels + (int) texture_y * texture->pitch + texture_x * texture->format->BytesPerPixel;
-            SDL_GetRGB(*(Uint32*)pixel, texture->format, &r, &g, &b);
+            Uint8 *pixel = (Uint8 *) texture->pixels + (int) texture_y * texture->pitch + texture_x * texture->format->BytesPerPixel;
+            SDL_GetRGB(*(Uint32 *)pixel, texture->format, &r, &g, &b);
             SDL_SetRenderDrawColor(raycaster_data->sdl_renderer, r, g, b, 255);
             SDL_RenderDrawPoint(raycaster_data->sdl_renderer, x, y);
             texture_y += texture_y_increment;
@@ -342,19 +342,18 @@ void render_and_sleep(RaycasterData* raycaster_data)
 }
 
 
-
-int get_current_square_value(RaycasterData* raycaster_data)
+int get_current_square_value(RaycasterData *raycaster_data)
 {
     return raycaster_data->map[(int) raycaster_data->position.x][(int) raycaster_data->position.y];
 }
 
 
-int screen(RaycasterData* raycaster_data, char* path)
+int screen(RaycasterData *raycaster_data, char *path)
 {
-    SDL_Texture* texture = IMG_LoadTexture(raycaster_data->sdl_renderer, path);
+    SDL_Texture *texture = IMG_LoadTexture(raycaster_data->sdl_renderer, path);
     if (!texture)
     {
-        printf("error attempting to load %s\n", path);
+        fprintf(stderr, "error attempting to load %s\n", path);
         return -1;
     }
     SDL_Rect texture_rect;

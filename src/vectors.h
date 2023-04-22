@@ -12,6 +12,6 @@ Vector;
 Rotates the vector
 angle is in radians
 */
-void rotate_vector(Vector* vector, double angle);
+void rotate_vector(Vector *vector, double angle);
 
 #endif

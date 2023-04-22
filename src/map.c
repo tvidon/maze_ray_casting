@@ -19,7 +19,7 @@ static void shuffle(int list[], int size)
 
 
 // Carve a maze using the recursive backtracking algorithm
-static void carve(int x, int y, MapInfo* map)
+static void carve(int x, int y, MapInfo *map)
 {
     int directions[] = {1, 2, 3, 4}; // up, down, left, right
     shuffle(directions, 4);
@@ -69,7 +69,7 @@ static void carve(int x, int y, MapInfo* map)
 }
 
 
-MapInfo* generate_map(int size)
+MapInfo *generate_map(int size)
 {
     // MAKE SURE MAP SIZE IS APPROPRIATE
 
@@ -81,16 +81,16 @@ MapInfo* generate_map(int size)
     
     // INITIALIZE RETURN POINTER
 
-    MapInfo* map= malloc(sizeof(MapInfo));
+    MapInfo *map= malloc(sizeof(MapInfo));
     if (!map)
     {
-        printf("error attempting to allocate memory for the map info\n");
+        fprintf(stderr, "error attempting to allocate memory for the map info\n");
         return NULL;
     }
-    map->map = malloc(size * sizeof(int*));
+    map->map = malloc(size * sizeof(int *));
     if (!map->map)
     {
-        printf("error attempting to allocate memory for the map\n");
+        fprintf(stderr, "error attempting to allocate memory for the map\n");
         free(map);
         return NULL;
     }
@@ -99,7 +99,7 @@ MapInfo* generate_map(int size)
         map->map[x] = malloc(size * sizeof(int));
         if (!map->map[x])
         {
-            printf("error attempting to allocate memory for the map\n");
+            fprintf(stderr, "error attempting to allocate memory for the map\n");
             for (int free_x = 0; free_x < x; free_x++)
                 free(map->map[free_x]);
             free(map->map);
@@ -148,7 +148,8 @@ MapInfo* generate_map(int size)
     return map;
 }
 
-void destroy_map(MapInfo* map)
+
+void destroy_map(MapInfo *map)
 {
     for (int x = 0; x < map->size; x++)
         free(map->map[x]);

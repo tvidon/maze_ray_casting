@@ -4,7 +4,7 @@
 typedef struct
 {
     int size;
-    int** map;
+    int **map;
 }
 MapInfo;
 
@@ -16,11 +16,11 @@ Squares with an odd x and y are guaranteed to be empty
 In the map: 0 represents an empty square, 1 represents a wall, 2 represents a wall with a different texture and without collision
 destroy_map should be called once the map isn't needed anymore
 */
-MapInfo* generate_map(int size);
+MapInfo *generate_map(int size);
 
 /*
 Frees the map
 */
-void destroy_map(MapInfo* map);
+void destroy_map(MapInfo *map);
 
 #endif
